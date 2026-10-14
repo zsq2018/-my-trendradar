@@ -82,6 +82,17 @@ def feishu(text, card=None):
 def main():
     bj = timezone(timedelta(hours=8))
     now = datetime.now(bj).strftime("%m-%d %H:%M")
+
+    # 测试推送：只发一条测试消息，不动快照
+    if os.environ.get("TEST_PUSH", "").lower() in ("1", "true", "yes"):
+        print("[test] 发送测试消息")
+        card = {"config": {"wide_screen_mode": True},
+                "header": {"template": "blue", "title": {"tag": "plain_text", "content": "Promies 监控已接入 ✅"}},
+                "elements": [{"tag": "div", "text": {"tag": "lark_md",
+                    "content": f"**测试消息** · {now}\n\nPromies 新码监控已配置成功。\n抓到新活动或补货时，会自动推送到这里。"}}]}
+        ok = feishu("Promies 监控测试", card)
+        print("[test] 推送结果:", "成功" if ok else "失败")
+        return 0 if ok else 1
     try:
         cards = parse(fetch(LIST_URL))
     except Exception as e:
