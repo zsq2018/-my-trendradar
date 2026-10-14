@@ -70,6 +70,10 @@ def feishu(text, card=None):
         return False
     if KEYWORD and KEYWORD not in text:
         text = f"{text}\n\n{KEYWORD}"
+    if card and KEYWORD:
+        t = card.get("header", {}).get("title", {})
+        if KEYWORD not in (t.get("content") or ""):
+            t["content"] = f"{KEYWORD} · {t.get('content', '')}".strip()
     payload = {"msg_type": "interactive", "card": card} if card else {"msg_type": "text", "content": {"text": text}}
     data = json.dumps(payload, ensure_ascii=False).encode()
     req = urllib.request.Request(WEBHOOK, data=data, headers={"Content-Type": "application/json"})
@@ -91,9 +95,9 @@ def main():
     if os.environ.get("TEST_PUSH", "").lower() in ("1", "true", "yes"):
         print("[test] 发送测试消息")
         card = {"config": {"wide_screen_mode": True},
-                "header": {"template": "blue", "title": {"tag": "plain_text", "content": "Promies 监控已接入 ✅"}},
+                "header": {"template": "blue", "title": {"tag": "plain_text", "content": f"{KEYWORD} · Promies 监控已接入 ✅"}},
                 "elements": [{"tag": "div", "text": {"tag": "lark_md",
-                    "content": f"**测试消息** · {now}\n\nPromies 新码监控已配置成功。\n抓到新活动或补货时，会自动推送到这里。"}}]}
+                    "content": f"**{KEYWORD}｜测试消息** · {now}\n\nPromies 新码监控已配置成功。\n抓到新活动或补货时，会自动推送到这里。"}}]}
         ok = feishu("Promies 监控测试", card)
         print("[test] 推送结果:", "成功" if ok else "失败")
         return 0 if ok else 1
