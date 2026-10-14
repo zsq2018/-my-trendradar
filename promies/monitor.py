@@ -6,6 +6,8 @@ from datetime import datetime, timezone, timedelta
 LIST_URL = "https://www.promies.net/promotions?platform=ios"
 STATE = os.environ.get("STATE_FILE", "state.json")
 WEBHOOK = os.environ.get("FEISHU_WEBHOOK", "").strip()
+# 飞书自定义机器人开了「关键词校验」，消息必须含这个词才收得到
+KEYWORD = os.environ.get("FEISHU_KEYWORD", "热点").strip()
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
 
 CARD_SPLIT = re.compile(r'<div\s+class="card-container')
@@ -66,6 +68,8 @@ def feishu(text, card=None):
     if not WEBHOOK:
         print("[warn] 未配置 FEISHU_WEBHOOK，跳过推送")
         return False
+    if KEYWORD and KEYWORD not in text:
+        text = f"{text}\n\n{KEYWORD}"
     payload = {"msg_type": "interactive", "card": card} if card else {"msg_type": "text", "content": {"text": text}}
     data = json.dumps(payload, ensure_ascii=False).encode()
     req = urllib.request.Request(WEBHOOK, data=data, headers={"Content-Type": "application/json"})
@@ -145,8 +149,8 @@ def main():
     text = "\n".join(lines)
     print(text)
     card = {"config": {"wide_screen_mode": True},
-            "header": {"template": "green", "title": {"tag": "plain_text", "content": "Promies 有新码 🎁"}},
-            "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": text}}]}
+            "header": {"template": "green", "title": {"tag": "plain_text", "content": f"{KEYWORD} · Promies 有新码 🎁"}},
+            "elements": [{"tag": "div", "text": {"tag": "lark_md", "content": text + f"\\n\\n———\\n{KEYWORD}｜Promies 新码监控"}}]}
     feishu(text, card)
     return 0
 
