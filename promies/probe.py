@@ -3,9 +3,10 @@
 import json, os, urllib.request
 
 WEBHOOK = os.environ.get("FEISHU_WEBHOOK", "").strip()
-CANDS = ["限免", "限免软件日报", "限免软件", "日报", "通知", "Promies", "promies",
-         "新码", "优惠", "推送", "白嫖", "免费", "福利", "好物", "软件",
-         "码", "激活码", "限免通知", "软件限免", "限时免费", "今日限免"]
+CANDS = ["热点", "新闻", "资讯", "热榜", "热搜", "今日热点", "TrendRadar", "trendradar",
+         "头条", "热点新闻", "监控", "提醒", "每日", "报告", "简报", "快报", "播报",
+         "限免日报", "免费软件", "软件日报", "羊毛", "薅羊毛", "资源", "分享", "推荐",
+         "情报", "日报推送", "热点推送", "新闻推送", "今日资讯"]
 
 def post(text):
     payload = {"msg_type": "text", "content": {"text": text}}
